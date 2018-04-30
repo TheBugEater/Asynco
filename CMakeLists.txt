@@ -20,6 +20,7 @@ include_directories(${INC_DIR})
 file(GLOB SOURCES ${SOURCE_DIR}/*.cpp)
 
 add_library(Asynco SHARED ${SOURCES})
+target_compile_definitions(Asynco PRIVATE ASYNCO_BUILD_LIBRARY=1)
 
 file(GLOB SAMPLE ${SAMPLE_DIR}/*.cpp)
 add_executable(Sample ${SAMPLE})
