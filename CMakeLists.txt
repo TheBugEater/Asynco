@@ -22,6 +22,10 @@ file(GLOB SOURCES ${SOURCE_DIR}/*.cpp)
 add_library(Asynco SHARED ${SOURCES})
 target_compile_definitions(Asynco PRIVATE ASYNCO_BUILD_LIBRARY=1)
 
+IF(CMAKE_COMPILER_IS_GNUCXX)
+    target_link_libraries(Asynco -pthread)
+ENDIF(CMAKE_COMPILER_IS_GNUCXX)
+
 file(GLOB SAMPLE ${SAMPLE_DIR}/*.cpp)
 add_executable(Sample ${SAMPLE})
 link_libraries(${CMAKE_BINARY_DIR})

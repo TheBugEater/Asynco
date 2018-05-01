@@ -4,7 +4,8 @@ typedef void(*OnAsyncTaskDone)();
 
 class AsyncoTask
 {
-    ASYNCO_EXPORT virtual void Start() {};
-    ASYNCO_EXPORT virtual void Execute() {};
-    ASYNCO_EXPORT virtual void Finish() {};
+public:
+    ASYNCO_EXPORT virtual void PreExecute() {};
+    ASYNCO_EXPORT virtual void DoInBackground() {};
+    ASYNCO_EXPORT virtual void PostExecute() {};
 };
