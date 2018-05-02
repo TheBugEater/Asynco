@@ -18,7 +18,7 @@ class AsyncoTaskManager
 {
     ASYNCO_DEFINE_SINGLETON(AsyncoTaskManager)
 
-    ASYNCO_EXPORT void Start(unsigned int maxThreads = 1);
+    ASYNCO_EXPORT void Start(uint32 maxThreads = 1);
     ASYNCO_EXPORT void AddTask(AsyncoTask* task);
 
 private:
@@ -26,6 +26,7 @@ private:
 
     void RunInTheThread();
 
+    // Mutex to Access Task Queue
     std::mutex                  m_queueLock;
 
     std::queue<AsyncoTask*>     m_taskQueue;

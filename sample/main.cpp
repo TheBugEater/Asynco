@@ -1,20 +1,22 @@
 #include <stdio.h>
 #include "AsyncoTaskManager.h"
 #include "AsyncoTask.h"
+#include <Windows.h>
 
-#ifdef __linux
-#include <unistd.h>
-#endif
+uint32 count = 0;
+std::mutex countMutex;
 
 class AsyncTestTask : public AsyncoTask
 {
     virtual void DoInBackground() 
     { 
-        std::cout << "Thread : " << std::this_thread::get_id() << std::endl;
+        std::this_thread::sleep_for(std::chrono::seconds(1));
 
-#ifdef __linux
-        sleep(1);
-#endif
+        {
+            std::lock_guard<std::mutex> countMutex(countMutex);
+            count++;
+            std::cout << "Finished Tasks: " << count << std::endl;
+        }
     }
 };
 
@@ -23,15 +25,17 @@ int main()
     auto instance = AsyncoTaskManager::GetInstance();
     
     // Max Worker Threads
-    instance->Start(4);
+    instance->Start(std::thread::hardware_concurrency());
 
-    // Spawn 100 jobs to test
-    for(int i=0; i < 100; i++)
+    while(1)
     {
-        instance->AddTask(new AsyncTestTask());
+        uint32 num;
+        std::cin >> num;
+        for(uint32 i=0; i < num; i++)
+        {
+            instance->AddTask(new AsyncTestTask());
+        }
     }
-
-    while(1){}
 
     return 0;
 }

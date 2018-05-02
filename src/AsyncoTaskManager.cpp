@@ -29,9 +29,9 @@ void AsyncoTaskManager::RunInTheThread()
     }
 }
 
-void AsyncoTaskManager::Start(unsigned int maxThreads)
+void AsyncoTaskManager::Start(uint32 maxThreads)
 {
-    for(unsigned int i = 0; i < maxThreads; i++)
+    for(uint32 i = 0; i < maxThreads; i++)
     {
         m_threadPool.push_back(std::thread(&AsyncoTaskManager::RunInTheThread, this));
     }
