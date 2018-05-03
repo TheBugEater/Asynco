@@ -1,11 +1,12 @@
 #include "Asynco.h"
 
-typedef void(*OnAsyncTaskDone)();
-
 class AsyncoTask
 {
 public:
-    ASYNCO_EXPORT virtual void PreExecute() {};
-    ASYNCO_EXPORT virtual void DoInBackground() {};
-    ASYNCO_EXPORT virtual void PostExecute() {};
+    AsyncoTask() : m_handleId(0) {}
+
+    ASYNCO_EXPORT virtual void      DoInBackground() {};
+
+private:
+    uint32                          m_handleId;
 };

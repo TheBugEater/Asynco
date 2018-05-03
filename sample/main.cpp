@@ -10,15 +10,19 @@ class AsyncTestTask : public AsyncoTask
 {
     virtual void DoInBackground() 
     { 
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        //std::this_thread::sleep_for(std::chrono::seconds(1));
 
         {
             std::lock_guard<std::mutex> countMutex(countMutex);
             count++;
-            std::cout << "Finished Tasks: " << count << std::endl;
         }
     }
 };
+
+void OnCompleted(AsyncoTaskResult* result)
+{
+    std::cout << "Finished Tasks: " << count << std::endl;
+}
 
 int main()
 {
@@ -27,14 +31,16 @@ int main()
     // Max Worker Threads
     instance->Start(std::thread::hardware_concurrency());
 
-    while(1)
+    uint32 num;
+    std::cin >> num;
+    for (uint32 i = 0; i < num; i++)
     {
-        uint32 num;
-        std::cin >> num;
-        for(uint32 i=0; i < num; i++)
-        {
-            instance->AddTask(new AsyncTestTask());
-        }
+        instance->AddTask(new AsyncTestTask(), OnCompleted);
+    }
+
+    while (1)
+    {
+        instance->Update();
     }
 
     return 0;
