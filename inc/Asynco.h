@@ -36,7 +36,7 @@ typedef wchar_t             WIDECHAR;   // A wide character
     private:                                            \
     static className* m_sInstance;                      \
     public:                                             \
-    ASYNCO_EXPORT static className* GetInstance();      \
+    ASYNCO_EXPORT static className* GetInstance();      
 
 #define ASYNCO_IMPLEMENT_SINGLETON(className)           \
     className* className::m_sInstance = nullptr;        \

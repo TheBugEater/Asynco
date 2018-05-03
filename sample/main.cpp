@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include "AsyncoTaskManager.h"
 #include "AsyncoTask.h"
+
+#ifdef _WIN32
 #include <Windows.h>
+#endif
 
 uint32 count = 0;
 std::mutex countMutex;
@@ -10,10 +13,10 @@ class AsyncTestTask : public AsyncoTask
 {
     virtual void DoInBackground() 
     { 
-        //std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::seconds(1));
 
         {
-            std::lock_guard<std::mutex> countMutex(countMutex);
+            std::lock_guard<std::mutex> lock(countMutex);
             count++;
         }
     }
