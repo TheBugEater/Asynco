@@ -18,8 +18,9 @@ set (CMAKE_CXX_STANDARD 11)
 # The following folder will be included
 include_directories(${INC_DIR})
 file(GLOB SOURCES ${SOURCE_DIR}/*.cpp)
+file(GLOB INCLUDES ${INC_DIR}/*.h)
 
-add_library(Asynco SHARED ${SOURCES})
+add_library(Asynco SHARED ${SOURCES} ${INCLUDES})
 target_compile_definitions(Asynco PRIVATE ASYNCO_BUILD_LIBRARY=1)
 
 IF(CMAKE_COMPILER_IS_GNUCXX)

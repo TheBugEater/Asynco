@@ -1,5 +1,6 @@
 #include "AsyncoTaskManager.h"
 #include "AsyncoTask.h"
+#include "AsyncoWorkerThread.h"
 
 ASYNCO_IMPLEMENT_SINGLETON(AsyncoTaskManager)
 
@@ -16,6 +17,7 @@ AsyncoTaskManager::AsyncoTaskManager()
 
 void AsyncoTaskManager::RunInTheThread()
 {
+    AsyncoWorkerThread worker;
     while(true)
     {
         AsyncoTaskBundle* currentJob = nullptr;
