@@ -1,6 +1,8 @@
 #pragma once
+#include "Asynco.h"
+#include <vector>
 
-class AsyncoTask;
+class AsyncoTaskBundle;
 
 /************************************************************
 * Every Worker Thread will own an object of AsyncoWorkerThread
@@ -10,10 +12,12 @@ class AsyncoWorkerThread
 public:
     AsyncoWorkerThread();
 
-    void            AssignTask(AsyncoTask* task);
+    void                            AssignTask(AsyncoTaskBundle* bundle);
 
-    void            Update(float delta);
+    void                            Update(float delta);
+
+    uint32                          GetCurrentNumTasks() const;
 
 private:
-    AsyncoTask*     m_currentTask;
+    std::vector<AsyncoTaskBundle*>  m_taskBundles;
 };

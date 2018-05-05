@@ -8,47 +8,6 @@
 
 class AsyncoTask;
 
-enum class ETaskStatus
-{
-    Idle,
-    InProgress,
-    Completed
-};
-
-class AsyncoTaskResult
-{
-    template<typename T>
-    T* GetResult()
-    {
-        return static_cast<T*>(this);
-    }
-};
-
-// Function Pointer to notify Task Completion
-typedef void(OnAsyncoTaskCompleted)(AsyncoTaskResult*);
-
-/********************************************************
- *  AsyncoTaskHandle
- *  Every Task gets it's own handle to query the state
- * ******************************************************/
-class AsyncoTaskHandle
-{
-    // Only AsyncoTaskManager should be able to create handles and change status
-    friend class    AsyncoTaskManager;
-
-public:
-    uint32          GetHandleId() const { return m_handleId; }
-    ETaskStatus     GetStatus() const { return m_taskStatus; }
-
-private:
-    AsyncoTaskHandle(uint32 handleId);
-
-    void                    SetStatus(ETaskStatus status) { m_taskStatus = status; }
-
-    uint32                  m_handleId;
-    ETaskStatus             m_taskStatus;
-};
-
 struct AsyncoTaskBundle
 {
     AsyncoTaskBundle()
@@ -72,7 +31,7 @@ class AsyncoTaskManager
 {
     ASYNCO_DEFINE_SINGLETON(AsyncoTaskManager)
 
-    ASYNCO_EXPORT void                  Start(uint32 maxThreads = 1);
+    ASYNCO_EXPORT void                  Start(uint32 maxThreads = 1, uint32 maxTasksPerThread = 8);
     ASYNCO_EXPORT AsyncoTaskHandle&     AddTask(AsyncoTask* task, OnAsyncoTaskCompleted* callback);
 
     ASYNCO_EXPORT void                  Update();
@@ -91,4 +50,6 @@ private:
 
     // Active Worker Threads
     std::vector<std::thread>        m_threadPool;
+
+    uint32                          m_maxTasksPerThread;
 };

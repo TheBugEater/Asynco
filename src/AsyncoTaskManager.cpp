@@ -8,7 +8,6 @@ AsyncoTaskHandle::AsyncoTaskHandle(uint32 handleId)
     : m_handleId(handleId)
     , m_taskStatus(ETaskStatus::Idle)
 {
-
 }
 
 AsyncoTaskManager::AsyncoTaskManager()
@@ -20,38 +19,47 @@ void AsyncoTaskManager::RunInTheThread()
     AsyncoWorkerThread worker;
     while(true)
     {
-        AsyncoTaskBundle* currentJob = nullptr;
 
+        // Check if we can Assign New Tasks to this Worker
+        auto currentNumTasks = worker.GetCurrentNumTasks();
+        if(currentNumTasks < m_maxTasksPerThread)
         {
-            std::lock_guard<std::mutex> lock(m_pendingTasksLock);
+            uint32 maxPossibleTasks = m_maxTasksPerThread - currentNumTasks;
 
-            if(!m_pendingTasks.empty())
+            std::vector<AsyncoTaskBundle*> pickedTasks;
+
             {
-                currentJob = m_pendingTasks.front();
-                m_pendingTasks.pop();
-                std::cout << "Picked a New Job for Thread: " << std::this_thread::get_id() << "\n";
-            }
-        }
+                std::lock_guard<std::mutex> lock(m_pendingTasksLock);
 
-        if(currentJob)
-        {
+                while(!m_pendingTasks.empty() && maxPossibleTasks > 0)
+                {
+                    auto currentJob = m_pendingTasks.front();
+                    m_pendingTasks.pop();
+
+                    pickedTasks.push_back(currentJob);
+
+                    --maxPossibleTasks;
+                }
+            }
+
             {
                 std::lock_guard<std::mutex> lock(m_activeTasksLock);
 
-                m_activeTasks.push_back(currentJob);
+                for(auto bundle : pickedTasks)
+                {
+                    m_activeTasks.push_back(bundle);
+                    worker.AssignTask(bundle);
+                }
             }
-
-            currentJob->m_handle->SetStatus(ETaskStatus::InProgress);
-
-            currentJob->m_task->DoInBackground();
-
-            currentJob->m_handle->SetStatus(ETaskStatus::Completed);
         }
+
+        worker.Update(0);
     }
 }
 
-void AsyncoTaskManager::Start(uint32 maxThreads)
+void AsyncoTaskManager::Start(uint32 maxThreads, uint32 maxTasksPerThread)
 {
+    m_maxTasksPerThread = maxTasksPerThread;
     for(uint32 i = 0; i < maxThreads; i++)
     {
         m_threadPool.push_back(std::thread(&AsyncoTaskManager::RunInTheThread, this));
@@ -79,11 +87,12 @@ void AsyncoTaskManager::Update()
 
     {
         std::lock_guard<std::mutex> lock(m_activeTasksLock);
+
         auto it = m_activeTasks.begin();
         while(it != m_activeTasks.end())
         {
             auto bundle = *it;
-            if (bundle->m_handle->m_taskStatus == ETaskStatus::Completed)
+            if (bundle->m_handle->GetStatus() == ETaskStatus::Completed)
             {
                 it = m_activeTasks.erase(it);
                 completedTasks.push_back(bundle);
@@ -97,6 +106,6 @@ void AsyncoTaskManager::Update()
 
     for (auto bundle : completedTasks)
     {
-        bundle->m_completionCallback(nullptr);
+        bundle->m_completionCallback(bundle->m_task->GetResult());
     }
 }

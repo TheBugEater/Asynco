@@ -11,14 +11,16 @@ std::mutex countMutex;
 
 class AsyncTestTask : public AsyncoTask
 {
-    virtual void DoInBackground() 
+    virtual ETaskResult Update(float delta) 
     { 
         std::this_thread::sleep_for(std::chrono::seconds(1));
 
         {
             std::lock_guard<std::mutex> lock(countMutex);
             count++;
+            std::cout << std::this_thread::get_id << " : " << count << std::endl;
         }
+        return ETaskResult::Success;
     }
 };
 
