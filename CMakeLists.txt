@@ -14,6 +14,7 @@ set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 
 set (CMAKE_CXX_STANDARD 11)
+set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
 # The following folder will be included
 include_directories(${INC_DIR})
