@@ -26,7 +26,7 @@ class AsyncTestTask : public AsyncoTask
         {
             std::lock_guard<std::mutex> lock(countMutex);
             count++;
-            std::cout << GetHandleId() << " : " << count << std::endl;
+            std::cout << "Task Handle: " << GetHandleId() << " : " << count << std::endl;
 
             SetResult(new AsyncTestTaskResult(count));
         }
@@ -40,9 +40,11 @@ void OnCompleted(AsyncoTaskResult* result)
     if(result)
     {
         auto testResult = result->GetResult<AsyncTestTaskResult>();
-
-        std::lock_guard<std::mutex> lock(countMutex);
-        std::cout << "Finished Task: " << testResult->GetValue() << std::endl;
+        if(testResult)
+        {
+            std::lock_guard<std::mutex> lock(countMutex);
+            std::cout << "Finished Task: " << testResult->GetValue() << std::endl;
+        }
     }
 }
 
