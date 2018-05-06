@@ -36,7 +36,8 @@ typedef wchar_t             WIDECHAR;   // A wide character
     private:                                            \
     static className* m_sInstance;                      \
     public:                                             \
-    ASYNCO_EXPORT static className* GetInstance();      
+    ASYNCO_EXPORT static className* GetInstance();      \
+    ASYNCO_EXPORT static void       DeleteInstance();         
 
 #define ASYNCO_IMPLEMENT_SINGLETON(className)           \
     className* className::m_sInstance = nullptr;        \
@@ -47,17 +48,20 @@ typedef wchar_t             WIDECHAR;   // A wide character
             m_sInstance = new className();              \
         }                                               \
         return m_sInstance;                             \
+    }                                                   \
+    void className::DeleteInstance()                    \
+    {                                                   \
+        if(m_sInstance)                                 \
+        {                                               \
+            delete m_sInstance;                         \
+            m_sInstance = nullptr;                      \
+        }                                               \
     }
 
-enum class ETaskStatus
-{
-    Idle,
-    InProgress,
-    Completed
-};
 
 class AsyncoTaskResult
 {
+public:
     template<typename T>
     T* GetResult()
     {
@@ -67,27 +71,4 @@ class AsyncoTaskResult
 
 // Function Pointer to notify Task Completion
 typedef void(OnAsyncoTaskCompleted)(AsyncoTaskResult*);
-
-/********************************************************
- *  AsyncoTaskHandle
- *  Every Task gets it's own handle to query the state
- * ******************************************************/
-class AsyncoTaskHandle
-{
-    // Only AsyncoWorkerThread should be able to create handles and change status
-    friend class    AsyncoWorkerThread;
-    friend class    AsyncoTaskManager;
-
-public:
-    uint32          GetHandleId() const { return m_handleId; }
-    ETaskStatus     GetStatus() const { return m_taskStatus; }
-
-private:
-    AsyncoTaskHandle(uint32 handleId);
-
-    void                    SetStatus(ETaskStatus status) { m_taskStatus = status; }
-
-    uint32                  m_handleId;
-    ETaskStatus             m_taskStatus;
-};
 

@@ -2,16 +2,20 @@
 #include "AsyncoTask.h"
 #include "AsyncoWorkerThread.h"
 
+#include <ctime>
+
 ASYNCO_IMPLEMENT_SINGLETON(AsyncoTaskManager)
 
 AsyncoTaskHandle::AsyncoTaskHandle(uint32 handleId)
     : m_handleId(handleId)
-    , m_taskStatus(ETaskStatus::Idle)
 {
 }
 
 AsyncoTaskManager::AsyncoTaskManager()
 {
+    // Generate a Random Number to Start with 
+    std::srand(std::time(nullptr)); 
+    m_taskHandleNum = std::rand();
 }
 
 void AsyncoTaskManager::RunInTheThread()
@@ -19,7 +23,6 @@ void AsyncoTaskManager::RunInTheThread()
     AsyncoWorkerThread worker;
     while(true)
     {
-
         // Check if we can Assign New Tasks to this Worker
         auto currentNumTasks = worker.GetCurrentNumTasks();
         if(currentNumTasks < m_maxTasksPerThread)
@@ -42,14 +45,9 @@ void AsyncoTaskManager::RunInTheThread()
                 }
             }
 
+            for(auto bundle : pickedTasks)
             {
-                std::lock_guard<std::mutex> lock(m_activeTasksLock);
-
-                for(auto bundle : pickedTasks)
-                {
-                    m_activeTasks.push_back(bundle);
-                    worker.AssignTask(bundle);
-                }
+                worker.AssignTask(bundle);
             }
         }
 
@@ -70,8 +68,10 @@ AsyncoTaskHandle& AsyncoTaskManager::AddTask(AsyncoTask* task, OnAsyncoTaskCompl
 {
     AsyncoTaskBundle* bundle = new AsyncoTaskBundle;
     bundle->m_task = task;
-    bundle->m_handle = new AsyncoTaskHandle(0);
+    bundle->m_handle = new AsyncoTaskHandle(++m_taskHandleNum);
     bundle->m_completionCallback = callback;
+
+    bundle->m_task->m_handleId = bundle->m_handle->GetHandleId();
 
     {
         std::lock_guard<std::mutex> guard(m_pendingTasksLock);
@@ -81,31 +81,29 @@ AsyncoTaskHandle& AsyncoTaskManager::AddTask(AsyncoTask* task, OnAsyncoTaskCompl
     return *bundle->m_handle;
 }
 
+void AsyncoTaskManager::AddCompletedTask(AsyncoTaskBundle* bundle)
+{
+    std::lock_guard<std::mutex> lock(m_completedTasksLock);
+    m_completedTasks.push_back(bundle);
+}
+
 void AsyncoTaskManager::Update()
 {
-    std::vector<AsyncoTaskBundle*> completedTasks;
-
     {
-        std::lock_guard<std::mutex> lock(m_activeTasksLock);
+        std::lock_guard<std::mutex> lock(m_completedTasksLock);
 
-        auto it = m_activeTasks.begin();
-        while(it != m_activeTasks.end())
+        if(m_completedTasks.size() > 0)
         {
-            auto bundle = *it;
-            if (bundle->m_handle->GetStatus() == ETaskStatus::Completed)
+            for (auto bundle : m_completedTasks)
             {
-                it = m_activeTasks.erase(it);
-                completedTasks.push_back(bundle);
-            }
-            else
-            {
-                ++it;
-            }
-        }
-    }
+                bundle->m_completionCallback(bundle->m_task->GetResult());
 
-    for (auto bundle : completedTasks)
-    {
-        bundle->m_completionCallback(bundle->m_task->GetResult());
+                delete bundle->m_task;
+                delete bundle->m_handle;
+                delete bundle;
+            }
+
+            m_completedTasks.clear();
+        }
     }
 }

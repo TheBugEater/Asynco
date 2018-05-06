@@ -7,6 +7,15 @@ AsyncoTask::AsyncoTask()
 
 }
 
+AsyncoTask::~AsyncoTask()
+{
+    if(m_result)
+    {
+        delete m_result;
+        m_result = nullptr;
+    }
+}
+
 AsyncoTaskResult* AsyncoTask::GetResult()
 {
     return m_result;

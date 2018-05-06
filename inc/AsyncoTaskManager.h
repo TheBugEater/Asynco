@@ -8,6 +8,24 @@
 
 class AsyncoTask;
 
+/********************************************************
+ *  AsyncoTaskHandle
+ *  Every Task gets it's own handle
+ * ******************************************************/
+class AsyncoTaskHandle
+{
+    // Only AsyncoTaskManager should be able to create handles and change status
+    friend class    AsyncoTaskManager;
+
+public:
+    uint32                  GetHandleId() const { return m_handleId; }
+
+private:
+    AsyncoTaskHandle(uint32 handleId);
+
+    uint32                  m_handleId;
+};
+
 struct AsyncoTaskBundle
 {
     AsyncoTaskBundle()
@@ -37,19 +55,25 @@ class AsyncoTaskManager
     ASYNCO_EXPORT void                  Update();
 
 private:
+    friend class AsyncoWorkerThread;
+
     AsyncoTaskManager();
 
+    // Internal Functions for Threads
     void                            RunInTheThread();
+    void                            AddCompletedTask(AsyncoTaskBundle* bundle);
 
     // Mutex to Access Tasks
     std::mutex                      m_pendingTasksLock;
-    std::mutex                      m_activeTasksLock;
+    std::mutex                      m_completedTasksLock;
 
     std::queue<AsyncoTaskBundle*>   m_pendingTasks;
-    std::vector<AsyncoTaskBundle*>  m_activeTasks;
+    std::vector<AsyncoTaskBundle*>  m_completedTasks;;
 
     // Active Worker Threads
     std::vector<std::thread>        m_threadPool;
 
     uint32                          m_maxTasksPerThread;
+
+    uint32                          m_taskHandleNum;
 };
