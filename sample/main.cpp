@@ -2,9 +2,7 @@
 #include "AsyncoTaskManager.h"
 #include "AsyncoTask.h"
 
-#ifdef _WIN32
-#include <Windows.h>
-#endif
+#include <ctime>
 
 uint32 count = 0;
 std::mutex countMutex;
@@ -21,8 +19,19 @@ private:
 
 class AsyncTestTask : public AsyncoTask
 {
+    virtual void Start()
+    {
+        m_destroyTime = (float)(std::rand() % 10);
+    }
+
     virtual ETaskResult Update(float delta) 
     { 
+        m_destroyTime -= delta;
+        if (m_destroyTime > 0)
+        {
+            return ETaskResult::InProgress;
+        }
+
         {
             std::lock_guard<std::mutex> lock(countMutex);
             count++;
@@ -33,6 +42,8 @@ class AsyncTestTask : public AsyncoTask
 
         return ETaskResult::Success;
     }
+private:
+    float  m_destroyTime;
 };
 
 void OnCompleted(AsyncoTaskResult* result)
@@ -50,6 +61,9 @@ void OnCompleted(AsyncoTaskResult* result)
 
 int main(int argc, char** argv)
 {
+    // Seed the Random Number Generator
+    std::srand((unsigned int)std::time(nullptr)); 
+
     auto instance = AsyncoTaskManager::GetInstance();
     
     uint32 numThreads = std::thread::hardware_concurrency();
@@ -71,7 +85,7 @@ int main(int argc, char** argv)
         instance->AddTask(new AsyncTestTask(), OnCompleted);
     }
 
-    while (1)
+    while (true)
     {
         instance->Update();
     }

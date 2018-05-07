@@ -21,6 +21,9 @@ AsyncoTaskManager::AsyncoTaskManager()
 void AsyncoTaskManager::RunInTheThread()
 {
     AsyncoWorkerThread worker;
+
+    std::clock_t lastFrameTime = std::clock();
+
     while(true)
     {
         // Check if we can Assign New Tasks to this Worker
@@ -51,8 +54,15 @@ void AsyncoTaskManager::RunInTheThread()
             }
         }
 
-        //TODO: Add Delta time
-        worker.Update(0);
+
+        // Calculate Delta
+        std::clock_t currentFrameTime = std::clock();
+        float delta = (float)(currentFrameTime - lastFrameTime) / CLOCKS_PER_SEC;
+
+        // Call Worker Update. This calls Update on all the available tasks on this Worker
+        worker.Update(delta);
+
+        lastFrameTime = currentFrameTime;
     }
 }
 
