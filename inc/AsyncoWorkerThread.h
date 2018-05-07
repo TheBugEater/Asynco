@@ -2,7 +2,7 @@
 #include "Asynco.h"
 #include <vector>
 
-class AsyncoTaskBundle;
+struct AsyncoTaskBundle;
 
 /************************************************************
 * Every Worker Thread will own an object of AsyncoWorkerThread

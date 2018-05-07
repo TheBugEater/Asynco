@@ -10,8 +10,8 @@ enum class ETaskResult
 class AsyncoTask
 {
 public:
-    AsyncoTask();
-    virtual ~AsyncoTask();
+    ASYNCO_EXPORT AsyncoTask();
+    ASYNCO_EXPORT virtual ~AsyncoTask();
 
     ASYNCO_EXPORT virtual void          Start() {};
     ASYNCO_EXPORT virtual ETaskResult   Update(float delta) { return ETaskResult::Failure; };
@@ -21,7 +21,7 @@ public:
     uint32                              GetHandleId() { return m_handleId; }
 
 protected:
-    void                                SetResult(AsyncoTaskResult* result);
+    ASYNCO_EXPORT void                                SetResult(AsyncoTaskResult* result);
 
 private:
     friend class AsyncoTaskManager;

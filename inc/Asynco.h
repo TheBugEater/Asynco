@@ -62,6 +62,9 @@ typedef wchar_t             WIDECHAR;   // A wide character
 class AsyncoTaskResult
 {
 public:
+    AsyncoTaskResult() {};
+    ~AsyncoTaskResult() {};
+
     template<typename T>
     T* GetResult()
     {

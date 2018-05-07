@@ -14,7 +14,7 @@ AsyncoTaskHandle::AsyncoTaskHandle(uint32 handleId)
 AsyncoTaskManager::AsyncoTaskManager()
 {
     // Generate a Random Number to Start with 
-    std::srand(std::time(nullptr)); 
+    std::srand((unsigned int)std::time(nullptr)); 
     m_taskHandleNum = std::rand();
 }
 

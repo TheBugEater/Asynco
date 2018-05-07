@@ -37,5 +37,5 @@ void AsyncoWorkerThread::Update(float delta)
 
 uint32 AsyncoWorkerThread::GetCurrentNumTasks() const
 {
-    return m_taskBundles.size();
+    return (uint32)m_taskBundles.size();
 }
