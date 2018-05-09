@@ -18,8 +18,8 @@ set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
 # The following folder will be included
 include_directories(${INC_DIR})
-file(GLOB SOURCES ${SOURCE_DIR}/*.cpp)
-file(GLOB INCLUDES ${INC_DIR}/*.h)
+file(GLOB_RECURSE SOURCES ${SOURCE_DIR}/*.cpp)
+file(GLOB_RECURSE INCLUDES ${INC_DIR}/*.h)
 
 add_library(Asynco SHARED ${SOURCES} ${INCLUDES})
 target_compile_definitions(Asynco PRIVATE ASYNCO_BUILD_LIBRARY=1)
