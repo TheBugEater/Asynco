@@ -21,7 +21,7 @@ public:
     uint32                              GetHandleId() { return m_handleId; }
 
 protected:
-    ASYNCO_EXPORT void                                SetResult(AsyncoTaskResult* result);
+    ASYNCO_EXPORT void                  SetResult(AsyncoTaskResult* result);
 
 private:
     friend class AsyncoTaskManager;
