@@ -17,19 +17,19 @@ typedef char                ANSICHAR;   // An ANSI character
 typedef wchar_t             WIDECHAR;   // A wide character        
 
 #ifdef _WIN64
-#define PTR_TO_UINT uint64
+    #define PTR_TO_UINT uint64
 #elif _WIN32
-#define PTR_TO_UINT uint32
+    #define PTR_TO_UINT uint32
 #endif
 
 #ifdef _WIN32
-#ifdef ASYNCO_BUILD_LIBRARY
-#define ASYNCO_EXPORT __declspec(dllexport)
+    #ifdef ASYNCO_BUILD_LIBRARY
+        #define ASYNCO_EXPORT __declspec(dllexport)
+    #else
+        #define ASYNCO_EXPORT __declspec(dllimport)
+    #endif
 #else
-#define ASYNCO_EXPORT __declspec(dllimport)
-#endif
-#else
-#define ASYNCO_EXPORT 
+    #define ASYNCO_EXPORT 
 #endif
 
 #define ASYNCO_DEFINE_SINGLETON(className)              \
