@@ -24,12 +24,12 @@ class AsyncTestTask : public AsyncoTask
         m_destroyTime = (float)(std::rand() % 10);
     }
 
-    virtual ETaskResult Update(float delta) 
+    virtual ETaskStatus Update(float delta) 
     { 
         m_destroyTime -= delta;
         if (m_destroyTime > 0)
         {
-            return ETaskResult::InProgress;
+            return ETaskStatus::InProgress;
         }
 
         {
@@ -40,7 +40,7 @@ class AsyncTestTask : public AsyncoTask
             SetResult(new AsyncTestTaskResult(count));
         }
 
-        return ETaskResult::Success;
+        return ETaskStatus::Success;
     }
 private:
     float  m_destroyTime;
