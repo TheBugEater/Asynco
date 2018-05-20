@@ -59,6 +59,13 @@ typedef wchar_t             WIDECHAR;   // A wide character
     }
 
 
+enum class ETaskStatus
+{
+    InProgress,
+    Success,
+    Failed
+};
+
 class AsyncoTaskResult
 {
 public:
@@ -70,6 +77,13 @@ public:
     {
         return static_cast<T*>(this);
     }
+
+    void            SetStatus(ETaskStatus result) { m_status = result; }
+    ETaskStatus     GetStatus() const { return m_status; }
+
+private:
+
+    ETaskStatus     m_status;
 };
 
 // Function Pointer to notify Task Completion

@@ -23,8 +23,15 @@ void AsyncoWorkerThread::Update(float delta)
     while(it != m_taskBundles.end())
     {
         auto bundle = *it;
-        if(bundle->m_task->Update(delta) > ETaskResult::InProgress)
+        auto status = bundle->m_task->Update(delta);
+        if(status > ETaskStatus::InProgress)
         {
+            auto result = bundle->m_task->GetResult();
+            if(result)
+            {
+                result->SetStatus(status);
+            }
+
             AsyncoTaskManager::GetInstance()->AddCompletedTask(bundle);
             it = m_taskBundles.erase(it);
         }
