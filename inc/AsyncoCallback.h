@@ -50,7 +50,12 @@ public:
     template<typename TClass>
     AsyncoCallback(TClass* obj, TRet(TClass::*func)(Args... args))
     {
-        m_holder = new ThisHolder<TClass>(obj, func);
+        m_holder = new ClassHolder<TClass>(obj, func);
+    }
+
+    AsyncoCallback(TRet (*func)(Args... args))
+    {
+        m_holder = new StaticHolder(func);
     }
 
     ~AsyncoCallback()
@@ -64,18 +69,19 @@ public:
         virtual TRet Invoke(Args...) = 0;
     };
 
+    // Holder to Handle Class member functions
     template<typename TClass>
-    struct ThisHolder : public BaseHolder
+    struct ClassHolder : public BaseHolder
     {
         typedef TRet(TClass::*FuncPointer)(Args... args);
 
-        ThisHolder()
+        ClassHolder()
             : m_this(nullptr)
             , m_function(nullptr)
         {
         }
 
-        ThisHolder(TClass* obj, FuncPointer func)
+        ClassHolder(TClass* obj, FuncPointer func)
             : m_this(obj)
             , m_function(func)
         {
@@ -83,7 +89,7 @@ public:
 
         virtual BaseHolder* Clone()
         {
-            ThisHolder<TClass>* holder = new ThisHolder<TClass>();
+            ClassHolder<TClass>* holder = new ClassHolder<TClass>();
             holder->m_this = m_this;
             holder->m_function = m_function;
             return holder;
@@ -91,10 +97,50 @@ public:
 
         virtual TRet Invoke(Args... args)
         {
+            if(!m_this)
+            {
+                return TRet();
+            }
+
             return (m_this->*m_function)(args...);
         }
 
         TClass*             m_this;
+        FuncPointer         m_function;
+    };
+
+    // Holder which Handles static functions
+    struct StaticHolder : public BaseHolder
+    {
+        typedef TRet(*FuncPointer)(Args... args);
+
+        StaticHolder()
+            : m_function(nullptr)
+        {
+        }
+
+        StaticHolder(FuncPointer func)
+            : m_function(func)
+        {
+        }
+
+        virtual BaseHolder* Clone()
+        {
+            StaticHolder* holder = new StaticHolder();
+            holder->m_function = m_function;
+            return holder;
+        }
+
+        virtual TRet Invoke(Args... args)
+        {
+            if(!m_function)
+            {
+                return TRet();
+            }
+
+            return m_function(args...);
+        }
+
         FuncPointer         m_function;
     };
 

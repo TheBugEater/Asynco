@@ -57,11 +57,24 @@ public:
             if(testResult)
             {
                 std::lock_guard<std::mutex> lock(countMutex);
-                std::cout << "Finished Task: " << testResult->GetValue() << std::endl;
+                std::cout << "Class Function: Finished Task: " << testResult->GetValue() << std::endl;
             }
         }
     }
 };
+
+void OnCompleted(AsyncoTaskResult* result)
+{
+    if(result)
+    {
+        auto testResult = result->GetResult<AsyncTestTaskResult>();
+        if(testResult)
+        {
+            std::lock_guard<std::mutex> lock(countMutex);
+            std::cout << "Static Function : Finished Task: " << testResult->GetValue() << std::endl;
+        }
+    }
+}
 
 int main(int argc, char** argv)
 {
@@ -87,7 +100,8 @@ int main(int argc, char** argv)
     std::cin >> num;
     for (uint32 i = 0; i < num; i++)
     {
-        instance->AddTask(new AsyncTestTask(), OnAsyncoTaskCompleted(&result, &HandleResult::OnCompleted));
+//        instance->AddTask(new AsyncTestTask(), OnAsyncoTaskCompleted(OnCompleted));
+         instance->AddTask(new AsyncTestTask(), OnAsyncoTaskCompleted(&result, &HandleResult::OnCompleted));
     }
 
     while (true)
