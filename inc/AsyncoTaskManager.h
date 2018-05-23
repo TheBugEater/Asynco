@@ -1,5 +1,6 @@
 #pragma once
 #include "Asynco.h"
+#include "AsyncoCallback.h"
 
 #include <thread>
 #include <queue>
@@ -7,6 +8,9 @@
 #include <iostream>
 
 class AsyncoTask;
+
+// Function Pointer to notify Task Completion
+typedef AsyncoCallback<void(AsyncoTaskResult*)> OnAsyncoTaskCompleted;
 
 /********************************************************
  *  AsyncoTaskHandle
@@ -31,14 +35,13 @@ struct AsyncoTaskBundle
     AsyncoTaskBundle()
         : m_handle(nullptr)
         , m_task(nullptr)
-        , m_completionCallback(nullptr)
     {
 
     }
 
     AsyncoTaskHandle*       m_handle;
     AsyncoTask*             m_task;
-    OnAsyncoTaskCompleted*  m_completionCallback;
+    OnAsyncoTaskCompleted   m_completionCallback;
 };
 
 /********************************************************
@@ -50,7 +53,7 @@ class AsyncoTaskManager
     ASYNCO_DEFINE_SINGLETON(AsyncoTaskManager)
 
     ASYNCO_EXPORT void                  Start(uint32 maxThreads = 1, uint32 maxTasksPerThread = 8);
-    ASYNCO_EXPORT AsyncoTaskHandle&     AddTask(AsyncoTask* task, OnAsyncoTaskCompleted* callback);
+    ASYNCO_EXPORT AsyncoTaskHandle&     AddTask(AsyncoTask* task, OnAsyncoTaskCompleted const& callback);
 
     ASYNCO_EXPORT void                  Update();
 

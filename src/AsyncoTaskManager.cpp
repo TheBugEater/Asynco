@@ -75,7 +75,7 @@ void AsyncoTaskManager::Start(uint32 maxThreads, uint32 maxTasksPerThread)
     }
 }
 
-AsyncoTaskHandle& AsyncoTaskManager::AddTask(AsyncoTask* task, OnAsyncoTaskCompleted* callback)
+AsyncoTaskHandle& AsyncoTaskManager::AddTask(AsyncoTask* task, OnAsyncoTaskCompleted const& callback)
 {
     AsyncoTaskBundle* bundle = new AsyncoTaskBundle;
     bundle->m_task = task;

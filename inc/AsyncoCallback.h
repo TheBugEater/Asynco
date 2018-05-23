@@ -1,4 +1,5 @@
 #pragma once
+#include "Asynco.h"
 
 template<typename TRet>
 class AsyncoCallback;
@@ -12,7 +13,41 @@ public:
     {
     }
 
-    template<typename TClass, typename ... Args>
+    AsyncoCallback(AsyncoCallback&& callback)
+    {
+        m_holder = callback.m_holder;
+        callback.m_holder = nullptr;
+    }
+
+    AsyncoCallback& operator=(AsyncoCallback&& callback)
+    {
+        ASYNCO_SAFE_DELETE(m_holder);
+
+        m_holder = callback.m_holder;
+        callback.m_holder = nullptr;
+        return *this;
+    }
+
+    AsyncoCallback(AsyncoCallback& callback)
+    {
+        if(callback.m_holder)
+        {
+            m_holder = callback.m_holder->Clone();
+        }
+    }
+
+    AsyncoCallback& operator=(AsyncoCallback const& callback)
+    {
+        ASYNCO_SAFE_DELETE(m_holder);
+
+        if(callback.m_holder)
+        {
+            m_holder = callback.m_holder->Clone();
+        }
+        return *this;
+    }
+   
+    template<typename TClass>
     AsyncoCallback(TClass* obj, TRet(TClass::*func)(Args... args))
     {
         m_holder = new ThisHolder<TClass>(obj, func);
@@ -20,15 +55,12 @@ public:
 
     ~AsyncoCallback()
     {
-        if (m_holder)
-        {
-            delete m_holder;
-            m_holder = nullptr;
-        }
+        ASYNCO_SAFE_DELETE(m_holder);
     }
 
     struct BaseHolder
     {
+        virtual BaseHolder* Clone() = 0;
         virtual TRet Invoke(Args...) = 0;
     };
 
@@ -37,10 +69,24 @@ public:
     {
         typedef TRet(TClass::*FuncPointer)(Args... args);
 
+        ThisHolder()
+            : m_this(nullptr)
+            , m_function(nullptr)
+        {
+        }
+
         ThisHolder(TClass* obj, FuncPointer func)
             : m_this(obj)
             , m_function(func)
         {
+        }
+
+        virtual BaseHolder* Clone()
+        {
+            ThisHolder<TClass>* holder = new ThisHolder<TClass>();
+            holder->m_this = m_this;
+            holder->m_function = m_function;
+            return holder;
         }
 
         virtual TRet Invoke(Args... args)

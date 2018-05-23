@@ -46,18 +46,22 @@ private:
     float  m_destroyTime;
 };
 
-void OnCompleted(AsyncoTaskResult* result)
+class HandleResult
 {
-    if(result)
+public:
+    void OnCompleted(AsyncoTaskResult* result)
     {
-        auto testResult = result->GetResult<AsyncTestTaskResult>();
-        if(testResult)
+        if(result)
         {
-            std::lock_guard<std::mutex> lock(countMutex);
-            std::cout << "Finished Task: " << testResult->GetValue() << std::endl;
+            auto testResult = result->GetResult<AsyncTestTaskResult>();
+            if(testResult)
+            {
+                std::lock_guard<std::mutex> lock(countMutex);
+                std::cout << "Finished Task: " << testResult->GetValue() << std::endl;
+            }
         }
     }
-}
+};
 
 int main(int argc, char** argv)
 {
@@ -78,11 +82,12 @@ int main(int argc, char** argv)
     // Max Worker Threads
     instance->Start(numThreads, tasksPerThread);
 
+    HandleResult result;
     uint32 num;
     std::cin >> num;
     for (uint32 i = 0; i < num; i++)
     {
-        instance->AddTask(new AsyncTestTask(), OnCompleted);
+        instance->AddTask(new AsyncTestTask(), OnAsyncoTaskCompleted(&result, &HandleResult::OnCompleted));
     }
 
     while (true)

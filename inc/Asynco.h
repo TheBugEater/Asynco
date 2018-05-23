@@ -59,6 +59,8 @@ typedef wchar_t             WIDECHAR;   // A wide character
     }
 
 
+#define ASYNCO_SAFE_DELETE(x) if(x){ delete x; x = nullptr; }
+
 enum class ETaskStatus
 {
     InProgress,
@@ -85,7 +87,4 @@ private:
 
     ETaskStatus     m_status;
 };
-
-// Function Pointer to notify Task Completion
-typedef void(OnAsyncoTaskCompleted)(AsyncoTaskResult*);
 
