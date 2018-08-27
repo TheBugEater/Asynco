@@ -72,7 +72,7 @@ class AsyncoTaskResult
 {
 public:
     AsyncoTaskResult() {};
-    ~AsyncoTaskResult() {};
+    virtual ~AsyncoTaskResult() {};
 
     template<typename T>
     T* GetResult()
